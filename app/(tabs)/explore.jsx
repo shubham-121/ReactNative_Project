@@ -1,11 +1,13 @@
 import { View, Text, StyleSheet } from 'react-native';
 import React from 'react';
+import SearchScreen from '../../components/Search/SearchScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ExplorePage() {
   return (
-    <View style={styles.container}>
-      <Text>ExplorePage is this one</Text>
-    </View>
+    <SafeAreaView className="flex-1 pb-0" edges={['top']}>
+      <SearchScreen></SearchScreen>
+    </SafeAreaView>
   );
 }
 

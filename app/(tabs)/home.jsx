@@ -5,9 +5,9 @@ import HomeScreen from '../../components/Home/HomeScreen';
 
 export default function Homepage() {
   return (
-    <SafeAreaView className="flex-1 bg-gray-300">
+    <View className="flex-1 bg-gray-300">
       <HomeScreen></HomeScreen>
-    </SafeAreaView>
+    </View>
   );
 }
 

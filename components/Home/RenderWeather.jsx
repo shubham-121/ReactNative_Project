@@ -5,45 +5,88 @@ import weatherPic from './../../assets/weather/weatherPic.jpg';
 import { useEffect, useState } from 'react';
 import Error from '../Utils/Error';
 import { convertTime } from '../Utils/helperFunctions/convertTime';
+import HourlyForecast from './HourlyForecast';
+import * as Location from 'expo-location';
 
 // calling the weather API here
-export default function RenderWeather() {
-  const [weatherData, setWeatherData] = useState(null);
+export default function RenderWeather({ weatherData, setWeatherData }) {
   const [fetchError, setFetchError] = useState(false);
   const [fetchErrorMessage, setFetchErrorMessage] = useState('');
 
+  const [location, setLocation] = useState(null);
+  const [locationErrorMsg, setlocationErrorMsg] = useState('');
+
   //fetch the weather details
   useEffect(() => {
-    setTimeout(() => {
-      async function fetchWeatherDetails() {
+    async function getUserLocation() {
+      let { status } = await Location.requestForegroundPermissionsAsync();
+
+      // if (status !== 'granted') {
+      //   console.log('location access deny', status);
+      //   locationErrorMsg('Permission to access location was denied');
+      //   return;
+      // }
+
+      if (status === 'granted') {
+        const userLocation = await Location.getCurrentPositionAsync();
+        setLocation({
+          latitude: userLocation.coords.latitude,
+          longitude: userLocation.coords.longitude,
+          source: 'device', //using accurate device location
+        });
+
+        console.log('User location fetched automatically:', userLocation);
+      } else {
         try {
-          const res = await fetch(
-            `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${API_KEY}&units=metric`
-          );
-
-          const data = await res.json();
-
-          if (data.cod !== 200) {
-            console.error('Error in fetching the weather data');
-            setFetchError(true);
-            setFetchErrorMessage(data.message);
-            return;
-          }
-
-          console.log('Weather data fetched:', data);
-          setWeatherData(data);
-        } catch (err) {
-          console.error('Error in fetching the weather data', err.message);
-          setFetchError(true);
-          setFetchErrorMessage('Sorry! Unable To Fetch The Data');
+          let res = await fetch('https://ipapi.co/json/');
+          let data = await res.json();
+          setLocation({
+            latitude: data.latitude,
+            longitude: data.longitude,
+            city: data.city,
+            country_name: data.country_name,
+            source: 'ip', //using network based location
+          });
+        } catch (e) {
+          setlocationErrorMsg('Permission to access location was denied');
         }
       }
-      fetchWeatherDetails();
-    }, 5000);
+    }
+
+    getUserLocation();
   }, []);
 
+  useEffect(() => {
+    if (!location) return;
+
+    async function fetchWeatherDetails() {
+      try {
+        const res = await fetch(
+          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=metric`
+        );
+
+        const data = await res.json();
+
+        if (data.cod !== 200) {
+          console.error('Error in fetching the weather data');
+          setFetchError(true);
+          setFetchErrorMessage(data.message);
+          return;
+        }
+
+        console.log('Weather data fetched:', data);
+        setWeatherData(data);
+      } catch (err) {
+        console.error('Error in fetching the weather data', err.message);
+        setFetchError(true);
+        setFetchErrorMessage('Sorry! Unable To Fetch The Data');
+      }
+    }
+    fetchWeatherDetails();
+  }, [location]);
+
   return (
-    <View className="mt-auto  flex-1 items-center">
+    <View className="mb-8 items-center">
       <Text className="mb-4 text-center text-4xl font-bold tracking-wide text-sky-600">
         {weatherData?.name}
       </Text>
@@ -61,40 +104,51 @@ export default function RenderWeather() {
 
 function WeatherDetails({ weatherData, setWeatherData }) {
   return (
-    <View className="w-full rounded-2xl bg-white/70 p-6 shadow-lg">
-      {/* Temperature & Condition */}
-      <View className="mb-6 flex-col items-center justify-center">
-        <Text className="text-5xl font-bold text-gray-800">
-          {Math.round(weatherData?.main?.temp)}°
+    <>
+      <View className="w-full rounded-2xl  p-6 ">
+        {/* Temperature & Condition */}
+        <View className="mb-6 flex-col items-center justify-center">
+          <Text className="text-5xl font-bold text-white">
+            {Math.round(weatherData?.main?.temp)}°
+          </Text>
+          <Text className="text-xl font-medium text-white">{weatherData?.weather[0]?.main}</Text>
+        </View>
+
+        {/* Max & Min */}
+        <View className="mb-4 flex-row justify-center gap-8">
+          <Text className="text-lg font-semibold text-white">
+            Max: {Math.ceil(weatherData?.main?.temp_max)}°
+          </Text>
+          <Text className="text-lg font-semibold text-white">
+            Min: {Math.floor(weatherData?.main?.temp_min)}°
+          </Text>
+        </View>
+
+        {/* Humidity */}
+        <Text className="mb-2 text-center text-lg font-semibold text-white">
+          Humidity: {weatherData?.main?.humidity}%
         </Text>
-        <Text className="text-xl font-medium text-gray-600">{weatherData?.weather[0]?.main}</Text>
+
+        {/* Sunrise & Sunset */}
+        <View className="mt-4 flex-row justify-around">
+          <Text className="text-center text-lg font-semibold text-amber-600">
+            Sunrise: {convertTime(weatherData?.sys?.sunrise)}
+          </Text>
+          <Text className="text-center text-lg font-semibold text-orange-600">
+            Sunset: {convertTime(weatherData?.sys?.sunset)}
+          </Text>
+        </View>
       </View>
 
-      {/* Max & Min */}
-      <View className="mb-4 flex-row justify-center gap-8">
-        <Text className="text-lg font-semibold text-blue-700">
-          Max: {Math.ceil(weatherData?.main?.temp_max)}°
-        </Text>
-        <Text className="text-lg font-semibold text-blue-700">
-          Min: {Math.floor(weatherData?.main?.temp_min)}°
-        </Text>
+      <View>
+        <Image
+          source={House}
+          className="object-fit m-[2%] "
+          style={{ height: 150, width: 200 }}></Image>
       </View>
 
-      {/* Humidity */}
-      <Text className="mb-2 text-center text-lg font-semibold text-gray-700">
-        Humidity: {weatherData?.main?.humidity}%
-      </Text>
-
-      {/* Sunrise & Sunset */}
-      <View className="mt-4 flex-row justify-around">
-        <Text className="text-center text-lg font-semibold text-amber-600">
-          Sunrise: {convertTime(weatherData?.sys?.sunrise)}
-        </Text>
-        <Text className="text-center text-lg font-semibold text-orange-600">
-          Sunset: {convertTime(weatherData?.sys?.sunset)}
-        </Text>
-      </View>
-    </View>
+      {/* <HourlyForecast></HourlyForecast> */}
+    </>
   );
 }
 
@@ -103,6 +157,14 @@ function WeatherDetails({ weatherData, setWeatherData }) {
 const lat = 30.3525997;
 const lon = 78.0191896;
 const API_KEY = 'eb2afa1fdab203f1c97ade85de93dd03';
+
+const threeHourData = [
+  { temp: '19C', weather: 'cloudy', time: '15:00' },
+  { temp: '21C', weather: 'clear', time: '18:00' },
+  { temp: '15C', weather: 'haze', time: '21:00' },
+  { temp: '10C', weather: 'cloudy', time: '24:00' },
+  { temp: '9C', weather: 'fog', time: '03:00' },
+];
 
 // 🌆 London
 // const lat = 51.5072;
