@@ -5,7 +5,7 @@ import searchBg from '../../assets/search/searchBg.jpg';
 import SearchBar from './SearchBar';
 
 export default function SearchScreen() {
-  const [searchCity, setsearchCity] = useState('Dehradun');
+  const [searchCity, setsearchCity] = useState('');
   return (
     <View className="flex-1 border-2 border-black">
       <ImageBackground source={searchBg} className="absolute inset-0" resizeMode="cover" />

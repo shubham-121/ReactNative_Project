@@ -1,6 +1,7 @@
 import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function SearchBar({ searchCity, setsearchCity }) {
   const [searchCityData, setSearchCityData] = useState(null);
@@ -57,48 +58,88 @@ export default function SearchBar({ searchCity, setsearchCity }) {
       <View className="flex-1   border-2 ">
         <SeachedCityData
           searchCityData={searchCityData}
-          setSearchCityData={setSearchCityData}></SeachedCityData>
+          setSearchCityData={setSearchCityData}
+          searchCity={searchCity}></SeachedCityData>
       </View>
     </>
   );
 }
 
-function SeachedCityData({ searchCityData, setSearchCityData }) {
+function SeachedCityData({ searchCityData, setSearchCityData, searchCity }) {
+  async function saveSearchedCity() {
+    try {
+      const stored = await AsyncStorage.getItem('savedLocations');
+
+      const cityList = stored ? JSON.parse(stored) : [];
+
+      cityList.push(searchCity);
+
+      await AsyncStorage.setItem('savedLocations', JSON.stringify(cityList));
+
+      console.log('City saved:', searchCity);
+    } catch (error) {
+      console.log('SaveCity error:', error);
+    }
+  }
+
+  async function getSavedCities() {
+    try {
+      const stored = await AsyncStorage.getItem('savedLocations');
+      const cityList = stored ? JSON.parse(stored) : [];
+
+      console.log('Saved cities:', cityList, 'Type:', typeof cityList);
+      return cityList;
+    } catch (error) {
+      console.log('Fetch error:', error);
+    }
+  }
+
   return (
     <>
-      {searchCityData ? (
-        <>
-          <View className="mx-auto mt-6 w-[90%] rounded-xl border border-gray-700 bg-gray-600/80 p-4">
-            {/* City Name */}
-            <Text className="text-2xl font-bold text-white">{searchCityData?.name}</Text>
+      {
+        searchCityData && (
+          <>
+            <View className="mx-auto mt-6 w-[90%] rounded-xl border border-gray-700 bg-gray-600/80 p-4">
+              {/* City Name */}
+              <Text className="text-2xl font-bold text-white">{searchCityData?.name}</Text>
 
-            {/* AQI + Temps Row */}
-            <View className="mt-3 flex flex-row items-start justify-between">
-              <View>
-                <Text className="text-base text-white">AQI: 72 (Good)</Text>
-                <Text className="mt-1 text-sm text-white">
-                  Max: {(searchCityData?.main?.temp_max).toFixed(1)}°C
-                </Text>
-                <Text className="text-sm text-white">
-                  Min: {(searchCityData?.main?.temp_min).toFixed(1)}°C
-                </Text>
-              </View>
+              {/* AQI + Temps Row */}
+              <View className="mt-3 flex flex-row items-start justify-between">
+                <View>
+                  <Text className="text-base text-white">AQI: 72 (Good)</Text>
+                  <Text className="mt-1 text-sm text-white">
+                    Max: {(searchCityData?.main?.temp_max).toFixed(1)}°C
+                  </Text>
+                  <Text className="text-sm text-white">
+                    Min: {(searchCityData?.main?.temp_min).toFixed(1)}°C
+                  </Text>
+                </View>
 
-              {/* Right side: Temp + Add Button */}
-              <View className="items-end">
-                <Text className="text-4xl font-bold text-white">
-                  {(searchCityData?.main?.temp).toFixed(1)}°C
-                </Text>
-                <Pressable className="mt-2 rounded-md bg-white/20 px-3 py-1 active:bg-white/30">
-                  <Text className="text-sm font-semibold text-white">Add</Text>
-                </Pressable>
+                {/* Right side: Temp + Add Button */}
+                <View className="items-end">
+                  <Text className="text-4xl font-bold text-white">
+                    {(searchCityData?.main?.temp).toFixed(1)}°C
+                  </Text>
+                  <Pressable
+                    onPress={saveSearchedCity}
+                    className="mt-2 rounded-md bg-white/20 px-3 py-1 active:bg-white/30">
+                    <Text className="text-sm font-semibold text-white">Add</Text>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={getSavedCities}
+                    className="mt-2 rounded-md bg-white/20 px-3 py-1 active:bg-white/30">
+                    <Text className="text-sm font-semibold text-white">Get Saved city</Text>
+                  </Pressable>
+                </View>
               </View>
             </View>
-          </View>
-        </>
-      ) : (
-        <ActivityIndicator size="large" color="blue" />
-      )}
+          </>
+        )
+        // : (
+        //   <ActivityIndicator size="large" color="blue" />
+        // )
+      }
     </>
   );
 }
