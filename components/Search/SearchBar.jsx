@@ -2,6 +2,8 @@ import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator } from 
 import React, { useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { useRouter } from 'expo-router';
 
 export default function SearchBar({ searchCity, setsearchCity }) {
   const [searchCityData, setSearchCityData] = useState(null);
@@ -66,6 +68,8 @@ export default function SearchBar({ searchCity, setsearchCity }) {
 }
 
 function SeachedCityData({ searchCityData, setSearchCityData, searchCity }) {
+  const router = useRouter();
+
   async function saveSearchedCity() {
     try {
       const stored = await AsyncStorage.getItem('savedLocations');
@@ -117,6 +121,16 @@ function SeachedCityData({ searchCityData, setSearchCityData, searchCity }) {
 
                 {/* Right side: Temp + Add Button */}
                 <View className="items-end">
+                  {/* Open the entered location weather screen */}
+                  <Pressable
+                    onPress={() =>
+                      router.push({
+                        pathname: '/searchedCity',
+                        params: { data: JSON.stringify(searchCityData) }, // 👈 wrap it as an object
+                      })
+                    }>
+                    <Text className=" border-2 border-black p-1 text-xl font-semibold"> View</Text>
+                  </Pressable>
                   <Text className="text-4xl font-bold text-white">
                     {(searchCityData?.main?.temp).toFixed(1)}°C
                   </Text>
