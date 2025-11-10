@@ -1,19 +1,12 @@
 import { View, Text, StyleSheet } from 'react-native';
 import React from 'react';
 import ProfileScreen from '../../components/profile/ProfileScreen';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function ProfilePage() {
   return (
-    <View style={styles.container}>
+    <SafeAreaView edges={['top']} className="flex-1 pb-0">
       <ProfileScreen></ProfileScreen>
-    </View>
+    </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-});

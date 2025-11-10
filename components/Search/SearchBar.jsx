@@ -1,15 +1,17 @@
 import { View, Text, StyleSheet, TextInput, Pressable, ActivityIndicator } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { ThemeContext } from '../../app/_layout';
 
 export default function SearchBar({ searchCity, setsearchCity }) {
   const [searchCityData, setSearchCityData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   const inset = useSafeAreaInsets();
+  const { deviceThemeMode, setdeviceThemeMode } = useContext(ThemeContext);
 
   async function fetchSearchedCityWeather() {
     if (!searchCity) return;
@@ -33,7 +35,7 @@ export default function SearchBar({ searchCity, setsearchCity }) {
     }
   }
 
-  //   fetchSearchedCityWeather();
+  // fetchSearchedCityWeather();
 
   useEffect(() => {
     if (!searchCity) setSearchCityData(null);
@@ -44,16 +46,23 @@ export default function SearchBar({ searchCity, setsearchCity }) {
       <View
         className="flex flex-row justify-center "
         style={{ marginTop: inset.top, paddingVertical: 10 }}>
-        <View className="w-[85%] flex-row items-center justify-between rounded-xl border border-gray-500 bg-transparent  px-4 py-2 shadow-md shadow-black/10">
+        <View
+          className={`w-[85%] flex-row items-center justify-between rounded-xl border px-4 py-2 shadow-md shadow-black/10 ${
+            deviceThemeMode === 'light'
+              ? 'border-gray-400 bg-white'
+              : 'border-gray-500 bg-transparent'
+          }`}>
           <TextInput
             placeholder="Enter Location"
-            placeholderTextColor="#aaa"
-            className="flex-1 text-lg font-semibold text-white"
+            placeholderTextColor={deviceThemeMode === 'light' ? '#555' : '#aaa'}
+            className={`flex-1 text-lg font-semibold ${
+              deviceThemeMode === 'light' ? 'text-black' : 'text-white'
+            }`}
             value={searchCity}
             onChangeText={setsearchCity}
           />
           <Pressable className="ml-3 active:opacity-70" onPress={fetchSearchedCityWeather}>
-            <Text className="text-2xl">🔍</Text>
+            <Text className="text-2xl">{`🔍`}</Text>
           </Pressable>
         </View>
       </View>
@@ -69,6 +78,8 @@ export default function SearchBar({ searchCity, setsearchCity }) {
 
 function SeachedCityData({ searchCityData, setSearchCityData, searchCity }) {
   const router = useRouter();
+
+  console.log('searched city data:', searchCityData);
 
   async function saveSearchedCity() {
     try {

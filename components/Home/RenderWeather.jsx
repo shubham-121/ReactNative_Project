@@ -2,11 +2,12 @@ import { View, Text, Image, ActivityIndicator, FlatList } from 'react-native';
 
 import House from './../../assets/weather/House.jpg';
 import weatherPic from './../../assets/weather/weatherPic.jpg';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import Error from '../Utils/Error';
 import { convertTime } from '../Utils/helperFunctions/convertTime';
 import HourlyForecast from './HourlyForecast';
 import * as Location from 'expo-location';
+import { UnitContext } from '../../app/_layout';
 
 // calling the weather API here
 export default function RenderWeather({ weatherData, setWeatherData, savedUserLocation }) {
@@ -16,7 +17,13 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
   const [location, setLocation] = useState(null);
   const [locationErrorMsg, setlocationErrorMsg] = useState('');
 
+  const { preferredUnit, setPreferredUnit } = useContext(UnitContext);
+
   // const [savedLocations,setSavedLocations]=useState(null)
+
+  useEffect(() => {
+    console.log('User unit prefrence changed:', preferredUnit);
+  }, [preferredUnit]);
 
   //1-fetch the user default location, through newtork or gps(permission needed)
   useEffect(() => {
@@ -65,7 +72,7 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
     async function fetchWeatherDetails() {
       try {
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=metric`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=${preferredUnit}`
         );
 
         const data = await res.json();
@@ -86,7 +93,7 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
       }
     }
     fetchWeatherDetails();
-  }, [location]);
+  }, [location, preferredUnit]);
 
   //  useEffect(() => {
   //    async function getExistingSavedLocations() {
@@ -124,13 +131,16 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
 }
 
 function WeatherDetails({ weatherData, setWeatherData }) {
+  const { preferredUnit, setPreferredUnit } = useContext(UnitContext);
+
   return (
     <>
       <View className="w-full rounded-2xl  p-6 ">
         {/* Temperature & Condition */}
         <View className="mb-6 flex-col items-center justify-center">
           <Text className="text-5xl font-bold text-white">
-            {Math.round(weatherData?.main?.temp)}°
+            {Math.round(weatherData?.main?.temp)}
+            {preferredUnit === 'standard' ? ' F' : '° C'}
           </Text>
           <Text className="text-xl font-medium text-white">{weatherData?.weather[0]?.main}</Text>
         </View>

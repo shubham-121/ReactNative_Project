@@ -7,7 +7,7 @@ import {
   FlatList,
   useWindowDimensions,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import DailyForecast from './DailyForecast';
@@ -18,6 +18,9 @@ import HourlyForecast from './HourlyForecast';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import PagerView from 'react-native-pager-view';
 import RenderWeather from './RenderWeather';
+import { lightTheme, darkTheme } from '../Utils/helperFunctions/theme';
+
+import { ThemeContext } from '../../app/_layout';
 
 export default function HomeScreen() {
   const tabBarHeight = useBottomTabBarHeight();
@@ -26,6 +29,9 @@ export default function HomeScreen() {
   const [savedLocations, setSavedLocations] = useState(null);
 
   const { width } = useWindowDimensions();
+
+  const { deviceThemeMode, setdeviceThemeMode } = useContext(ThemeContext);
+  const theme = deviceThemeMode === 'light' ? lightTheme : darkTheme;
 
   useEffect(() => {
     async function getExistingSavedLocations() {
@@ -42,11 +48,20 @@ export default function HomeScreen() {
   }, []);
 
   return (
-    <View className="flex-1">
+    <View style={{ flex: 1, backgroundColor: theme.background }}>
       <ImageBackground
         source={gradientBG}
         resizeMode="cover"
         className="absolute bottom-0 left-0 right-0 top-0"
+      />
+
+      {/* Overlay */}
+      <View
+        style={{
+          ...StyleSheet.absoluteFillObject,
+          backgroundColor:
+            deviceThemeMode === 'light' ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.6)',
+        }}
       />
 
       <FlatList
@@ -70,11 +85,12 @@ export default function HomeScreen() {
                 savedUserLocation={item}
               />
               {/* <DailyForecast /> */}
-              <ExtraData
+              {/* <ExtraData
                 weatherData={weatherData}
                 setWeatherData={setWeatherData}
                 savedUserLocation={item}
-              />
+              /> */}
+              {/* <ExtraData weatherData={weatherData} /> */}
             </ScrollView>
           </View>
         )}></FlatList>
