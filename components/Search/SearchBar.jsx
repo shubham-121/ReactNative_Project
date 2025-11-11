@@ -4,21 +4,22 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { ThemeContext } from '../../app/_layout';
+import { ThemeContext, UnitContext } from '../../app/_layout';
 
 export default function SearchBar({ searchCity, setsearchCity }) {
   const [searchCityData, setSearchCityData] = useState(null);
   const [errorMsg, setErrorMsg] = useState('');
 
   const inset = useSafeAreaInsets();
-  const { deviceThemeMode, setdeviceThemeMode } = useContext(ThemeContext);
+  const { deviceThemeMode } = useContext(ThemeContext);
+  const { preferredUnit } = useContext(UnitContext);
 
   async function fetchSearchedCityWeather() {
     if (!searchCity) return;
 
     try {
       const res = await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${searchCity}&appid=${API_KEY}&units=metric`
+        `https://api.openweathermap.org/data/2.5/weather?q=${searchCity}&appid=${apiKey}&units=${preferredUnit}`
       );
       const data = await res.json();
 
@@ -114,48 +115,59 @@ function SeachedCityData({ searchCityData, setSearchCityData, searchCity }) {
       {
         searchCityData && (
           <>
-            <View className="mx-auto mt-6 w-[90%] rounded-xl border border-gray-700 bg-gray-600/80 p-4">
+            <View className="mx-auto  mt-6 w-[90%] rounded-2xl bg-gray-700/70 p-5 shadow-lg shadow-black/30">
               {/* City Name */}
-              <Text className="text-2xl font-bold text-white">{searchCityData?.name}</Text>
+              <Text className="text-center text-2xl font-bold tracking-wide text-white">
+                {searchCityData?.name}
+              </Text>
 
-              {/* AQI + Temps Row */}
-              <View className="mt-3 flex flex-row items-start justify-between">
+              {/* Weather Details Row */}
+              <View className=" flex flex-row items-center justify-between">
+                {/* Left Side */}
                 <View>
-                  <Text className="text-base text-white">AQI: 72 (Good)</Text>
-                  <Text className="mt-1 text-sm text-white">
-                    Max: {(searchCityData?.main?.temp_max).toFixed(1)}°C
+                  <Text className="text-md  text-gray-200">AQI: 72 (Good)</Text>
+                  <Text className="text-md mt-1  text-gray-200">
+                    Max: {searchCityData?.main?.temp_max.toFixed(1)}°C
                   </Text>
-                  <Text className="text-sm text-white">
-                    Min: {(searchCityData?.main?.temp_min).toFixed(1)}°C
+                  <Text className="text-md text-gray-200">
+                    Min: {searchCityData?.main?.temp_min.toFixed(1)}°C
                   </Text>
                 </View>
 
-                {/* Right side: Temp + Add Button */}
+                {/* Right Side */}
                 <View className="items-end">
-                  {/* Open the entered location weather screen */}
+                  {/* Temperature */}
+                  <Text className="mb-1 text-4xl font-extrabold text-white">
+                    {searchCityData?.main?.temp.toFixed(1)}°C
+                  </Text>
+
+                  {/* View Button */}
                   <Pressable
                     onPress={() =>
                       router.push({
                         pathname: '/searchedCity',
-                        params: { data: JSON.stringify(searchCityData) }, // 👈 wrap it as an object
+                        params: { data: JSON.stringify(searchCityData) },
                       })
-                    }>
-                    <Text className=" border-2 border-black p-1 text-xl font-semibold"> View</Text>
-                  </Pressable>
-                  <Text className="text-4xl font-bold text-white">
-                    {(searchCityData?.main?.temp).toFixed(1)}°C
-                  </Text>
-                  <Pressable
-                    onPress={saveSearchedCity}
-                    className="mt-2 rounded-md bg-white/20 px-3 py-1 active:bg-white/30">
-                    <Text className="text-sm font-semibold text-white">Add</Text>
+                    }
+                    className="mt-1 rounded-lg bg-blue-500/70 px-4 py-2 active:bg-blue-600/80">
+                    <Text className="text-sm font-semibold text-white">View Details</Text>
                   </Pressable>
 
+                  {/* Add Button */}
                   <Pressable
-                    onPress={getSavedCities}
-                    className="mt-2 rounded-md bg-white/20 px-3 py-1 active:bg-white/30">
-                    <Text className="text-sm font-semibold text-white">Get Saved city</Text>
+                    onPress={saveSearchedCity}
+                    className="mt-2 rounded-lg bg-green-500/70 px-4 py-2 active:bg-green-600/80">
+                    <Text className="text-sm font-semibold text-white">Add to Saved</Text>
                   </Pressable>
+
+                  {/* Debug Button */}
+                  {/* <Pressable
+                    onPress={getSavedCities}
+                    className="mt-2 rounded-lg bg-white/20 px-3 py-1 active:bg-white/30">
+                    <Text className="text-xs font-semibold text-white">
+                      View Saved List (Debug)
+                    </Text>
+                  </Pressable> */}
                 </View>
               </View>
             </View>
@@ -169,8 +181,4 @@ function SeachedCityData({ searchCityData, setSearchCityData, searchCity }) {
   );
 }
 
-// https://api.openweathermap.org/data/2.5/weather?q=London&appid={API key}
-
-// const lat = 30.3525997;
-// const lon = 78.0191896;
-const API_KEY = 'eb2afa1fdab203f1c97ade85de93dd03';
+const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;

@@ -30,12 +30,6 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
     async function getUserLocation() {
       let { status } = await Location.requestForegroundPermissionsAsync();
 
-      // if (status !== 'granted') {
-      //   console.log('location access deny', status);
-      //   locationErrorMsg('Permission to access location was denied');
-      //   return;
-      // }
-
       if (status === 'granted') {
         const userLocation = await Location.getCurrentPositionAsync();
         setLocation({
@@ -56,8 +50,8 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
             country_name: data.country_name,
             source: 'ip', //using network based location
           });
-        } catch (e) {
-          setlocationErrorMsg('Permission to access location was denied');
+        } catch (error) {
+          setlocationErrorMsg('Permission to access location was denied', error.message);
         }
       }
     }
@@ -72,7 +66,7 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
     async function fetchWeatherDetails() {
       try {
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=${preferredUnit}`
+          `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${apiKey}&units=${preferredUnit}`
         );
 
         const data = await res.json();
@@ -93,7 +87,7 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
       }
     }
     fetchWeatherDetails();
-  }, [location, preferredUnit]);
+  }, [location, preferredUnit, apiKey]);
 
   //  useEffect(() => {
   //    async function getExistingSavedLocations() {
@@ -183,32 +177,4 @@ function WeatherDetails({ weatherData, setWeatherData }) {
   );
 }
 
-// https://api.openweathermap.org/data/2.5/weather?lat=30.3525997&lon=78.0191896&appid=eb2afa1fdab203f1c97ade85de93dd03
-
-const lat = 30.3525997;
-const lon = 78.0191896;
-const API_KEY = 'eb2afa1fdab203f1c97ade85de93dd03';
-
-const threeHourData = [
-  { temp: '19C', weather: 'cloudy', time: '15:00' },
-  { temp: '21C', weather: 'clear', time: '18:00' },
-  { temp: '15C', weather: 'haze', time: '21:00' },
-  { temp: '10C', weather: 'cloudy', time: '24:00' },
-  { temp: '9C', weather: 'fog', time: '03:00' },
-];
-
-// 🌆 London
-// const lat = 51.5072;
-// const lon = -0.1276;
-
-// // 🌆 Oslo
-// const lat = 59.9139;
-// const lon = 10.7522;
-
-// // 🌆 Cape Town
-// const lat = -33.9249;
-// const lon = 18.4241;
-
-// // 🌆 Sydney
-// const lat = -33.8688;
-// const lon = 151.2093;
+const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;

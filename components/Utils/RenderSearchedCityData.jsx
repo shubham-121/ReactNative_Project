@@ -122,7 +122,7 @@ function WeatherDetails({ locationData }) {
       </View>
 
       <HourlyForecast locationName={locationData?.name}></HourlyForecast>
-      <ExtraData />
+      <ExtraData weatherData={locationData} />
     </>
   );
 }
@@ -135,6 +135,8 @@ function HourlyForecast({ locationName }) {
   const [threeHourData, setthreeHourData] = useState(null); //state for holding the forecasted data
   const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;
 
+  const { preferredUnit } = useContext(UnitContext);
+
   console.log('date:', getTodaysDate());
 
   useEffect(() => {
@@ -143,8 +145,7 @@ function HourlyForecast({ locationName }) {
     async function threeHourlyForecast() {
       try {
         const res = await fetch(
-          // `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=metric`
-          `https://api.openweathermap.org/data/2.5/forecast?q=${locationName}&appid=${apiKey}&units=metric`
+          `https://api.openweathermap.org/data/2.5/forecast?q=${locationName}&appid=${apiKey}&units=${preferredUnit}`
         );
 
         const data = await res.json();
@@ -172,6 +173,7 @@ function HourlyForecast({ locationName }) {
     }
     threeHourlyForecast();
   }, [targetDate, locationName, apiKey]);
+
   return (
     <>
       <View className="rounded-3xl border border-gray-300 bg-white/40 p-5 shadow-md backdrop-blur-xl">

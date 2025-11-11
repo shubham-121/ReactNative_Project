@@ -1,9 +1,10 @@
 import { View, Text, Image, ActivityIndicator, ScrollView } from 'react-native';
 import weatherPic from './../../assets/weather/weatherPic.jpg';
-import { useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { getTodayDate } from '../Utils/helperFunctions/getTodayDate';
 import ExtraData from './ExtraData';
 import * as Location from 'expo-location';
+import { UnitContext } from '../../app/_layout';
 
 export default function HourlyForecast({ weatherData, setWeatherData }) {
   //3 hour forecast one day data component
@@ -17,6 +18,8 @@ export default function HourlyForecast({ weatherData, setWeatherData }) {
 
   // const [fetchError, setFetchError] = useState(false);
   // const [fetchErrorMessage, setFetchErrorMessage] = useState('');
+
+  const { preferredUnit } = useContext(UnitContext);
 
   const [location, setLocation] = useState(null);
   const [locationErrorMsg, setlocationErrorMsg] = useState('');
@@ -66,7 +69,7 @@ export default function HourlyForecast({ weatherData, setWeatherData }) {
     async function threeHourlyForecast() {
       try {
         const res = await fetch(
-          `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&appid=${API_KEY}&units=metric`
+          `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&appid=${apiKey}&units=${preferredUnit}`
         );
 
         const data = await res.json();
@@ -91,7 +94,7 @@ export default function HourlyForecast({ weatherData, setWeatherData }) {
       }
     }
     threeHourlyForecast();
-  }, [targetDate, location]);
+  }, [targetDate, location, preferredUnit, apiKey]);
 
   //   useEffect(() => {
   //     console.log('Three hour data updated', threeHourData);
@@ -141,4 +144,4 @@ export default function HourlyForecast({ weatherData, setWeatherData }) {
   );
 }
 
-const API_KEY = 'eb2afa1fdab203f1c97ade85de93dd03';
+const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;

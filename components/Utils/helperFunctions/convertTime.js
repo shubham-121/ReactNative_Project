@@ -8,6 +8,6 @@ export function convertTime(secondsPassed) {
     minute: '2-digit',
   });
 
-  //   console.log('Sunset time:', timeString);
+  console.log('Sunset time:', timeString);
   return timeString;
 }

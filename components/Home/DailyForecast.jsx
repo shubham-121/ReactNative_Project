@@ -8,7 +8,7 @@ export default function DailyForecast() {
     async function fetchDailyForecast() {
       try {
         const res = await fetch(
-          `api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=7&appid=${API_KEY}`
+          `api.openweathermap.org/data/2.5/forecast/daily?lat=${lat}&lon=${lon}&cnt=7&appid=${apiKey}`
         );
         const data = await res.json();
 
@@ -29,6 +29,6 @@ export default function DailyForecast() {
 
 const lat = 30.3525997;
 const lon = 78.0191896;
-const API_KEY = 'eb2afa1fdab203f1c97ade85de93dd03';
+const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;
 
 // api.openweathermap.org/data/2.5/forecast/daily?lat=30.3525997&lon=78.0191896&cnt=7&appid=eb2afa1fdab203f1c97ade85de93dd03

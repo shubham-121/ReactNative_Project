@@ -33,19 +33,19 @@ export default function HomeScreen() {
   const { deviceThemeMode, setdeviceThemeMode } = useContext(ThemeContext);
   const theme = deviceThemeMode === 'light' ? lightTheme : darkTheme;
 
-  useEffect(() => {
-    async function getExistingSavedLocations() {
-      const existingSavedLocations = await AsyncStorage.getItem('savedLocations');
-      if (!existingSavedLocations) {
-        console.log('No existing location', existingSavedLocations);
-        return;
-      }
+  // useEffect(() => {
+  //   async function getExistingSavedLocations() {
+  //     const existingSavedLocations = await AsyncStorage.getItem('savedLocations');
+  //     if (!existingSavedLocations) {
+  //       console.log('No existing location', existingSavedLocations);
+  //       return;
+  //     }
 
-      console.log('Exsiting locations found:', JSON.parse(existingSavedLocations));
-      setSavedLocations(JSON.parse(existingSavedLocations));
-    }
-    getExistingSavedLocations();
-  }, []);
+  //     console.log('Exsiting locations found:', JSON.parse(existingSavedLocations));
+  //     setSavedLocations(JSON.parse(existingSavedLocations));
+  //   }
+  //   getExistingSavedLocations();
+  // }, []);
 
   return (
     <View style={{ flex: 1, backgroundColor: theme.background }}>
@@ -64,39 +64,65 @@ export default function HomeScreen() {
         }}
       />
 
-      <FlatList
-        data={savedLocations}
-        horizontal
-        pagingEnabled
-        keyExtractor={(item, index) => index.toString()}
-        showsHorizontalScrollIndicator
-        renderItem={({ item, index }) => (
-          <View style={{ width }}>
-            <ScrollView contentContainerStyle={{ padding: 40 }} nestedScrollEnabled={true}>
-              <Text>{item}</Text>
-              <RenderWeather
-                weatherData={weatherData}
-                setWeatherData={setWeatherData}
-                savedUserLocation={item}
-              />
-              <HourlyForecast
-                weatherData={weatherData}
-                setWeatherData={setWeatherData}
-                savedUserLocation={item}
-              />
-              {/* <DailyForecast /> */}
-              {/* <ExtraData
+      <View style={{ width }}>
+        <ScrollView contentContainerStyle={{ padding: 40 }} nestedScrollEnabled={true}>
+          <RenderWeather
+            weatherData={weatherData}
+            setWeatherData={setWeatherData}
+            savedUserLocation={'Delhi'}
+          />
+          <HourlyForecast
+            weatherData={weatherData}
+            setWeatherData={setWeatherData}
+            savedUserLocation={'Delhi'}
+          />
+          {/* <DailyForecast /> */}
+          {/* <ExtraData
                 weatherData={weatherData}
                 setWeatherData={setWeatherData}
                 savedUserLocation={item}
               /> */}
-              {/* <ExtraData weatherData={weatherData} /> */}
-            </ScrollView>
-          </View>
-        )}></FlatList>
+          {/* <ExtraData weatherData={weatherData} /> */}
+        </ScrollView>
+      </View>
     </View>
   );
 }
+
+///////////////////////////////////////////////////////////////////
+
+//  <FlatList
+//    data={savedLocations}
+//    horizontal
+//    pagingEnabled
+//    keyExtractor={(item, index) => index.toString()}
+//    showsHorizontalScrollIndicator
+//    renderItem={({ item, index }) => (
+//      <View style={{ width }}>
+//        <ScrollView contentContainerStyle={{ padding: 40 }} nestedScrollEnabled={true}>
+//          <Text>{item}</Text>
+//          <RenderWeather
+//            weatherData={weatherData}
+//            setWeatherData={setWeatherData}
+//            savedUserLocation={item}
+//          />
+//          <HourlyForecast
+//            weatherData={weatherData}
+//            setWeatherData={setWeatherData}
+//            savedUserLocation={item}
+//          />
+//          {/* <DailyForecast /> */}
+//          {/* <ExtraData
+//                 weatherData={weatherData}
+//                 setWeatherData={setWeatherData}
+//                 savedUserLocation={item}
+//               /> */}
+//          {/* <ExtraData weatherData={weatherData} /> */}
+//        </ScrollView>
+//      </View>
+//    )}></FlatList>;
+
+/******************************** */
 
 //  <FlatList
 //    data={savedLocations}
