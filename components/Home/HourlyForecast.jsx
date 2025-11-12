@@ -70,6 +70,7 @@ export default function HourlyForecast({ weatherData, setWeatherData }) {
       try {
         const res = await fetch(
           `https://api.openweathermap.org/data/2.5/forecast?lat=${location.latitude}&lon=${location.longitude}&appid=${apiKey}&units=${preferredUnit}`
+          // `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${preferredUnit}`
         );
 
         const data = await res.json();
@@ -145,3 +146,5 @@ export default function HourlyForecast({ weatherData, setWeatherData }) {
 }
 
 const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;
+const lat = 30.3519;
+const lon = 78.007;

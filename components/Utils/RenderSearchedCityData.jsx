@@ -17,13 +17,14 @@ import Error from './Error';
 import { convertTime } from './helperFunctions/convertTime';
 import * as Location from 'expo-location';
 import { ThemeContext, UnitContext } from '../../app/_layout';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import gradientBG from '../../assets/gradientBG.jpg';
 import { darkTheme, lightTheme } from './helperFunctions/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import ExtraData from '../Home/ExtraData';
 import { getTodayDate } from './helperFunctions/getTodayDate';
+import LiveWeather from '../LiveWeather';
 // import HourlyForecast from '../Home/HourlyForecast';
 
 // calling the weather API here by city name
@@ -34,24 +35,48 @@ export default function RenderSearchedCityData({ locationData }) {
   const theme = deviceThemeMode === 'light' ? lightTheme : darkTheme;
 
   const router = useRouter();
+  const { top, bottom, right, left } = useSafeAreaInsets();
 
   return (
     <SafeAreaView edges={['top']} style={{ flex: 1 }}>
       <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
+        {/*  */}
         <View className="flex-1 border-2 bg-gray-400 p-4">
+          {/* <View className=" z-50  flex-row justify-end border-2 px-4 pt-2">
+            <Pressable
+              onPress={() => router.back()}
+              className="z-50 rounded-full bg-black/40 p-2 active:bg-black/60">
+              <Ionicons name="arrow-back" size={26} color="white" />
+            </Pressable>
+          </View> */}
+
+          <Pressable
+            onPress={() => router.back()}
+            style={{
+              position: 'absolute',
+              top: top - 20,
+              right: 16,
+              zIndex: 50,
+            }}
+            className="rounded-full bg-black/40 p-2 active:bg-black/60">
+            <Ionicons name="arrow-back" size={26} color="white" />
+          </Pressable>
+
           <Text className="z-50 text-center text-3xl font-bold  text-white">
             {locationData?.name}
           </Text>
 
-          <View className="z-50 flex-row justify-end px-4 pt-2">
-            <Pressable
-              onPress={() => router.back()}
-              className="rounded-full bg-black/40 p-2 active:bg-black/60">
-              <Ionicons name="arrow-back" size={26} color="white" />
-            </Pressable>
+          <View className="z-50 mt-[10%]  flex-1">
+            {locationData && (
+              <LiveWeather
+                weatherType={locationData.weather[0].main}
+                weatherID={locationData.weather[0].id}
+              />
+            )}
           </View>
 
           <ImageBackground
+            pointerEvents="none"
             source={gradientBG}
             resizeMode="cover"
             className="absolute bottom-0 left-0 right-0 top-0"
@@ -59,6 +84,7 @@ export default function RenderSearchedCityData({ locationData }) {
 
           {/* Overlay */}
           <View
+            pointerEvents="none"
             style={{
               ...StyleSheet.absoluteFillObject,
               backgroundColor:

@@ -1,13 +1,14 @@
-import { View, Text, Image, ActivityIndicator, FlatList } from 'react-native';
+import { View, Text, Image, ActivityIndicator, FlatList, StyleSheet, Button } from 'react-native';
 
 import House from './../../assets/weather/House.jpg';
 import weatherPic from './../../assets/weather/weatherPic.jpg';
-import { useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useRef, useState } from 'react';
 import Error from '../Utils/Error';
 import { convertTime } from '../Utils/helperFunctions/convertTime';
 import HourlyForecast from './HourlyForecast';
 import * as Location from 'expo-location';
 import { UnitContext } from '../../app/_layout';
+import LiveWeather from '../LiveWeather';
 
 // calling the weather API here
 export default function RenderWeather({ weatherData, setWeatherData, savedUserLocation }) {
@@ -67,6 +68,7 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
       try {
         const res = await fetch(
           `https://api.openweathermap.org/data/2.5/weather?lat=${location.latitude}&lon=${location.longitude}&appid=${apiKey}&units=${preferredUnit}`
+          // `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=${apiKey}&units=${preferredUnit}`
         );
 
         const data = await res.json();
@@ -89,27 +91,21 @@ export default function RenderWeather({ weatherData, setWeatherData, savedUserLo
     fetchWeatherDetails();
   }, [location, preferredUnit, apiKey]);
 
-  //  useEffect(() => {
-  //    async function getExistingSavedLocations() {
-  //      const existingSavedLocations = await AsyncStorage.getItem('savedLocations');
-  //      if (!existingSavedLocations) {
-  //        console.log('No existing location', existingSavedLocations);
-  //        return;
-  //      }
-
-  //      console.log('Exsiting locations found:', existingSavedLocations);
-  //      setSavedLocations(existingSavedLocations)
-  //    }
-  //    getExistingSavedLocations();
-  //  }, []);
-
   return (
     <>
       <View className="mb-8 items-center">
         <Text className="mb-4 text-center text-4xl font-bold tracking-wide text-sky-600">
           {weatherData?.name}
         </Text>
-        <Image source={weatherPic} style={{ width: 100, height: 100, borderRadius: 30 }}></Image>
+        {/* <Image source={weatherPic} style={{ width: 100, height: 100, borderRadius: 30 }}></Image> */}
+
+        {weatherData && (
+          <LiveWeather
+            weatherType={weatherData.weather[0].main}
+            weatherID={weatherData.weather[0].id}
+          />
+        )}
+
         {fetchError && <Error fetchErrorMessage={fetchErrorMessage}></Error>}
         {weatherData ? (
           <WeatherDetails
@@ -178,3 +174,5 @@ function WeatherDetails({ weatherData, setWeatherData }) {
 }
 
 const apiKey = process.env.EXPO_PUBLIC_WEATHER_API_KEY;
+const lat = 30.3519;
+const lon = 78.007;
